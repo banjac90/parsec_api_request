@@ -9,21 +9,19 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,     
 )
 import sys
+import time
 import os
 import pandas as pd
 from pandasModel import PandasModel
 from getAPIdata import getMachinesFromParsecAPI, getUsersFromParsecAPI, parse_parsec_data
-from PyQt5.QtCore import QThread, QMutex
-
-  
 
 class ParsecApp(QMainWindow):
+    
     def __init__(self):        
         super().__init__()
         os.environ['PARSEC_AUTH_HEADER'] = 'Bearer tapi_2MpVKNJBcdp8LX70beGfYCffwWt.NDBmMzVlZDRiMWNhMzkxYzg2OGYzMDkxNTE4NTE0ZGM'
-        self.initUI()
-        
-    
+        self.initUI()       
+            
     def initUI(self):
         self.machines_data = None
         self.users_data = None      
@@ -40,8 +38,7 @@ class ParsecApp(QMainWindow):
         self.setData = QPushButton(self)        
         self.table = QTableView(self)
         self.inofo_text = QTextEdit(self)
-        self.inofo_text.setReadOnly(True)
-        #self.update_status()
+        self.inofo_text.setReadOnly(True)        
         self.inofo_text.append("App Initialized")
         self.setData.clicked.connect(self.run_api_threads)        
         self.setData.setText("Send API request")         
@@ -58,46 +55,51 @@ class ParsecApp(QMainWindow):
         main_layout.addWidget(self.table)
         self.centralWidget.setLayout(main_layout) 
 
-
-    def handle_user_data(self, result): 
+    def handle_machine_data(self, result):
         try:
-            print(result)
-            self.users_data = result.get('data', {})
-            self.user_data_ready = True
-            self.check_and_update_table()
-        except Exception as e:
-            self.inofo_text.append(f"Error handling user data: {str(e)}")
-
-    def handle_machine_data(self, result): 
-        try:
-            print(result)        
+            print(f"Result is: {result['data']}")      
             self.machines_data = result.get('data', {})
-            self.machines_data_ready = True
-            self.check_and_update_table()
+            self.machines_data_ready = True            
+            getUsersFromParsecAPI(self.update_status, self.handle_user_data)                      
         except Exception as e:
             self.inofo_text.append(f"Error handling machine data: {str(e)}")
 
-    def check_and_update_table(self):
-        if self.machines_data_ready and self.user_data_ready:
-            self.set_data_to_table()
+
+    def handle_user_data(self, result): 
+        try:
+            print(f"Result is: {result['data']}")
+            self.users_data = result.get('data', {})  
+            self.user_data_ready = True 
+            self.check_and_update_table()            
+        except Exception as e:
+            self.inofo_text.append(f"Error handling user data: {str(e)}")
 
     def run_api_threads(self):           
-        if not self.machines_data_ready and not self.user_data_ready:
-            self.inofo_text.append("Sending API requests...")
-            self.setData.setEnabled(False)  # Disable the button during requests
-            getMachinesFromParsecAPI(self.inofo_text.append, self.handle_machine_data)              
-            getUsersFromParsecAPI(self.inofo_text.append, self.handle_user_data)
-        else:
-            self.check_and_update_table()
-            self.inofo_text.append("Data already retrieved and displayed.")
-    
-    def set_data_to_table(self): 
-        self.data = parse_parsec_data(self.machines_data, self.users_data)        
+        self.inofo_text.append("Sending API requests...")
+        self.setData.setEnabled(False)  # Disable the button during requests
+        getMachinesFromParsecAPI(self.update_status, self.handle_machine_data)
+        # time.sleep(30)
+        # self.check_and_update_table()
+                         
+     
+    def set_data_to_table(self):         
+        self.data = parse_parsec_data(self.machines_data, self.users_data)   
+        print(self.data)     
         self.model = PandasModel(self.data)        
         self.table.setModel(self.model)
         self.table.resizeRowsToContents()
         self.table.resizeColumnsToContents() 
+        self.setData.setEnabled(True)
     
+    def check_and_update_table(self):
+        print(self.machines_data_ready)
+        print(self.user_data_ready)
+        if self.machines_data_ready and self.user_data_ready:
+            self.set_data_to_table()            
+            
+
+    def update_status(self, message):
+        self.inofo_text.append(message)
 
 
 if __name__ == '__main__':

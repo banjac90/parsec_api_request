@@ -1,3 +1,4 @@
-/parsec/*
-/__pychache__/*
+/parsec
+__pychache__/*
+*.pyc
 /venv/ .vscode/

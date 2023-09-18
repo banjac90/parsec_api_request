@@ -11,9 +11,7 @@ class Worker(QObject):
         super().__init__()
         self._data = data
         self.network_manager = None
-        self.network_reply = None
-
-        self.status_message.connect(self.append_status)
+        self.network_reply = None        
 
     def send_request(self):
         self.network_manager = QNetworkAccessManager()
@@ -25,7 +23,7 @@ class Worker(QObject):
             }
 
             if not headers['Authorization']:
-                self.status_message.emit('API key is not set in environment variable')
+                print('API key is not set in environment variable')
                 return
 
             query_string = QUrlQuery()
@@ -48,22 +46,25 @@ class Worker(QObject):
     def handle_response(self):
         try:
             if self.network_reply.error() == QNetworkReply.NetworkError.NoError:
+                status_code = self.network_reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
                 data_bytes = self.network_reply.readAll().data()
                 data_str = data_bytes.decode('utf-8')
                 data = json.loads(data_str)
                 self.status_message.emit('Data received')
                 self.results.emit(data)
                 print(f"Data emitted {data}")
+                self.status_message.emit(f"Request status code is: {status_code}")
+                
             else:
                 error_message = self.network_reply.errorString()
                 self.status_message.emit(f'Error during sending request: {error_message}')
         except Exception as ex:
             self.status_message.emit(f'An unexpected error occurred: {str(ex)}')
 
-        self.network_reply.deleteLater()
+        self.network_reply.deleteLater()        
         self.finished.emit()
+        self.status_message.emit("Finished emited")
 
-    def append_status(self, message):
-        self.status_message.emit(message)
+
 
 
