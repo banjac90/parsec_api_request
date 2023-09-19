@@ -23,9 +23,9 @@ from worker.pyqtworker import Worker
 
 machine_thread = QThread()
 user_thread = QThread()
+mutex = QMutex()
 
-
-def getMachinesFromParsecAPI(status_function, handle_results):
+def getMachinesFromParsecAPI(status_function, handle_results, second_thread):
     
     request_data = {
         'url': 'https://api.parsec.app/v1/teams/2K8swCWalUnTtYv7VQTnkLy0pL1/machines',
@@ -43,17 +43,15 @@ def getMachinesFromParsecAPI(status_function, handle_results):
         machine_thread.quit()
         machine_request_worker.deleteLater()
         machine_thread.deleteLater()
-        
+        second_thread()
     
     machine_thread.started.connect(machine_request_worker.send_request)
     machine_request_worker.status_message.connect(status_function)
     machine_request_worker.results.connect(handle_results)
     machine_request_worker.finished.connect(machine_finished)
-    
-    
     machine_thread.start()
 
-def getUsersFromParsecAPI(status_function, handle_results):       
+def getUsersFromParsecAPI(status_function, handle_results, update_data):           
     request_data ={
         'url': "https://api.parsec.app/v1/teams/2K8swCWalUnTtYv7VQTnkLy0pL1/members",
         'query': {
@@ -69,7 +67,9 @@ def getUsersFromParsecAPI(status_function, handle_results):
     def user_finished():
         user_thread.quit()
         user_request_worker.deleteLater()
-        user_thread.deleteLater()        
+        user_thread.deleteLater()   
+        update_data()
+             
 
     user_thread.started.connect(user_request_worker.send_request)
     user_request_worker.status_message.connect(status_function)
