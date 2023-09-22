@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,     
 )
-from PyQt5.QtCore import pyqtSignal
 import sys
 import os
 import pandas as pd
@@ -19,7 +18,7 @@ class ParsecApp(QMainWindow):
     
     def __init__(self):        
         super().__init__()
-        os.environ['PARSEC_AUTH_HEADER'] = 'Bearer tapi_2MpVKNJBcdp8LX70beGfYCffwWt.NDBmMzVlZDRiMWNhMzkxYzg2OGYzMDkxNTE4NTE0ZGM'
+        #os.environ['PARSEC_AUTH_HEADER'] = 'Bearer tapi_2MpVKNJBcdp8LX70beGfYCffwWt.NDBmMzVlZDRiMWNhMzkxYzg2OGYzMDkxNTE4NTE0ZGM'
         self.initUI()  
          
             
@@ -57,24 +56,18 @@ class ParsecApp(QMainWindow):
         self.centralWidget.setLayout(main_layout) 
 
     def handle_machine_data(self, result):
-        try:
-            print(f"Result is: {result['data']}")      
+        try:               
             self.machines_data = result.get('data', {})
-            self.machines_data_ready = True  
-                      
-            getUsersFromParsecAPI(self.update_status, self.handle_user_data) 
-            self.data_ready.emit()                    
+            self.machines_data_ready = True 
+            getUsersFromParsecAPI(self.update_status, self.handle_user_data)                                
         except Exception as e:
             self.inofo_text.append(f"Error handling machine data: {str(e)}")
-
 
     def handle_user_data(self, result): 
         try:
             print(f"Result is: {result['data']}")
             self.users_data = result.get('data', {})  
-            self.user_data_ready = True
-            #self.check_and_update_table()
-            
+            self.user_data_ready = True 
         except Exception as e:
             self.inofo_text.append(f"Error handling user data: {str(e)}")
 
@@ -94,7 +87,7 @@ class ParsecApp(QMainWindow):
         self.table.setModel(self.model)
         self.table.resizeRowsToContents()
         self.table.resizeColumnsToContents() 
-        self.setData.setEnabled(True)
+        self.setData.setEnabled(True)        
 
     def update_status(self, message):
         self.inofo_text.append(message)

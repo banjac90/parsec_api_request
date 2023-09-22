@@ -1,29 +1,10 @@
 import pandas as pd
-from PyQt5.QtCore import QThread, QMutex
+from PyQt5.QtCore import QThread
 from worker.pyqtworker import Worker
-
-#get all team machines
-#headers are for auth on parsec API and, MUST BE TOP SICRET!
-#Headers contains parsec API key
-
-# def getMachinesFromParsecAPI(status_function, handle_results):
-#     # url = request_data["url"]
-#     # query = request_data.get('query')        
-#     # header = {'Authorization': 'Bearer tapi_2MpVKNJBcdp8LX70beGfYCffwWt.NDBmMzVlZDRiMWNhMzkxYzg2OGYzMDkxNTE4NTE0ZGM'}
-
-#     # try:
-#     #     response = requests.get(url=url, params=query, headers=header)                        
-#     #     response.raise_for_status()
-#     #     result = response.json() 
-#     # except requests.HTTPError as error:  
-#     #     print(f'Error during sending request to {url}: {error}')  
-#     # finally:
-#     #     return result['data']
-    
 
 machine_thread = QThread()
 user_thread = QThread()
-mutex = QMutex()
+
 
 def getMachinesFromParsecAPI(status_function, handle_results, second_thread):
     
@@ -39,6 +20,7 @@ def getMachinesFromParsecAPI(status_function, handle_results, second_thread):
     machine_request_worker = Worker(request_data)
     machine_request_worker.moveToThread(machine_thread)
     
+    #Define machines thread finishing tasks
     def machine_finished():
         machine_thread.quit()
         machine_request_worker.deleteLater()
@@ -64,12 +46,12 @@ def getUsersFromParsecAPI(status_function, handle_results, update_data):
     user_request_worker = Worker(request_data)
     user_request_worker.moveToThread(user_thread)
     
+    #Define users thread finishing tasks
     def user_finished():
         user_thread.quit()
         user_request_worker.deleteLater()
         user_thread.deleteLater()   
-        update_data()
-             
+        update_data()             
 
     user_thread.started.connect(user_request_worker.send_request)
     user_request_worker.status_message.connect(status_function)
@@ -77,26 +59,8 @@ def getUsersFromParsecAPI(status_function, handle_results, update_data):
     user_request_worker.finished.connect(user_finished)
     
     user_thread.start()
-    
-   
-# def getUsersFromParsecAPI(status_function, handle_results):
 
-#     # url = request_data["url"]
-#     # query = request_data.get('query')        
-#     # header = {'Authorization': 'Bearer tapi_2MpVKNJBcdp8LX70beGfYCffwWt.NDBmMzVlZDRiMWNhMzkxYzg2OGYzMDkxNTE4NTE0ZGM'}
-
-#     # try:
-#     #     response = requests.get(url=url, params=query, headers=header)                        
-#     #     response.raise_for_status()
-#     #     result = response.json() 
-#     # except requests.HTTPError as error:  
-#     #     print(f'Error during sending request to {url}: {error}')  
-#     # finally:
-#     #     return result['data']
-
-
-def parse_parsec_data(machine_data, user_data): 
-    print("parse_parsec_data started")
+def parse_parsec_data(machine_data, user_data):     
     machines = machine_data    
     users = user_data    
     data = None
