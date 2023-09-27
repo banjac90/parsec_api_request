@@ -3,6 +3,7 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 import json
 import os
 
+# Worker for sending request with QtNetwork module
 class Worker(QObject):
     status_message = pyqtSignal(str)
     finished = pyqtSignal()
@@ -17,6 +18,7 @@ class Worker(QObject):
     def send_request(self):
         """Sending request data"""
         self.network_manager = QNetworkAccessManager()
+        # Token is set in PARSEC_AUTH_HEADER environment variable
         token = f"{os.environ['PARSEC_AUTH_HEADER']}"
         try:
             url = QUrl(self._data['url'])

@@ -1,0 +1,24 @@
+QWidget {
+  background-color: #DCDCDC;
+}
+QTextEdit#logs {
+    min-width : 350 px;
+    max-width : 400 px;
+    min-height: 200 px;
+    max-height: 200 px;    
+    background-color: #FFFFF0;     
+    font: Verdanas;    
+}
+QTableView#table{
+    min-width : 520 px;
+    max-width : 540 px;
+    min-height: 300 px;
+    max-height: 320 px;   
+    background-color: #FFFAF0;   
+}
+QPushButton#send_button{
+    border-top: 3px transparent;
+    border-bottom: 3px transparent;
+    border-right: 10px transparent;
+    border-left: 10px transparen;
+}

@@ -3,6 +3,12 @@ from PyQt5 import QtCore
 
 
 class PandasModel(QtCore.QAbstractTableModel):
+    """
+    Model created from QAbstractTableModel.
+    Main function is to create model for Pandas data.
+    Args:
+        data: Pandas DataFrame
+    """
 
     def __init__(self, data):
         super().__init__()
